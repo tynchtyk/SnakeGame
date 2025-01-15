@@ -1,4 +1,5 @@
 # run_experiment_sarsa.py
+import numpy as np
 
 import pygame
 import sys
@@ -81,6 +82,90 @@ def run_experiment_sarsa(state_space, rewards, num_episodes=1000, show_game=Fals
 
     return total_rewards, lengths, agent
 
+def moving_average(data, window_size=50):
+    """
+    Compute the moving average of a list.
+    """
+    return np.convolve(data, np.ones(window_size) / window_size, mode='valid')
+
+def plot_results(results, step=30, window_size=50):
+    """
+    Plot the results with moving averages.
+    """
+    plt.figure(figsize=(12, 5))
+
+    # -- Subplot 1: Total Reward --
+    plt.subplot(1, 2, 1)
+    for reward_name, state_dict in results.items():
+        for state_name, (total_rewards, lengths) in state_dict.items():
+            avg_rewards = moving_average(total_rewards, window_size)
+            episodes = range(1, len(avg_rewards) + 1)
+            plt.plot(
+                [e for e in episodes][::step],
+                [r for r in avg_rewards][::step],
+                label=f"{state_name}+{reward_name}"
+            )
+    plt.title("Total Reward (Moving Average)")
+    plt.xlabel("Episode")
+    plt.ylabel("Average Reward")
+    plt.legend()
+
+    # -- Subplot 2: Snake Length --
+    plt.subplot(1, 2, 2)
+    for reward_name, state_dict in results.items():
+        for state_name, (total_rewards, lengths) in state_dict.items():
+            avg_lengths = moving_average(lengths, window_size)
+            episodes = range(1, len(avg_lengths) + 1)
+            plt.plot(
+                [e for e in episodes][::step],
+                [l for l in avg_lengths][::step],
+                label=f"{state_name}+{reward_name}"
+            )
+    plt.title("Snake Length (Moving Average)")
+    plt.xlabel("Episode")
+    plt.ylabel("Average Length")
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
+
+def plot_results_by_reward(results, step=30, window_size=50):
+    for reward_name, state_dict in results.items():
+        plt.figure(figsize=(12, 5))
+
+        # -- Subplot 1: Total Reward --
+        plt.subplot(1, 2, 1)
+        for state_name, (total_rewards, lengths) in state_dict.items():
+            #avg_rewards = moving_average(total_rewards, window_size)
+            episodes = range(1, len(total_rewards) + 1)
+            plt.plot(
+                [e for e in episodes][::step],
+                [r for r in total_rewards][::step],
+                label=state_name
+            )
+        plt.title(f"Sarsa Learning Reward Graph: {reward_name}")
+        plt.xlabel("Episode")
+        plt.ylabel("Reward")
+        plt.legend()
+
+        # -- Subplot 2: Snake Length --
+        plt.subplot(1, 2, 2)
+        for state_name, (total_rewards, lengths) in state_dict.items():
+            #avg_lengths = moving_average(lengths, window_size)
+            episodes = range(1, len(lengths) + 1)
+            plt.plot(
+                [e for e in episodes][::step],
+                [l for l in lengths][::step],
+                label=state_name
+            )
+        plt.title(f"Sarsa Learning Length Graph: {reward_name}")
+        plt.xlabel("Episode")
+        plt.ylabel("Length")
+        plt.legend()
+
+        plt.tight_layout()
+        plt.show()
+
 def run_all_experiments_sarsa():
     """
     Runs SARSA training for all combinations of state spaces (S1..S5)
@@ -116,40 +201,6 @@ def run_all_experiments_sarsa():
             # Store results
             results[reward_name][state_name] = (total_rewards, lengths)
 
-    # 3. Plot results for each reward on a separate figure
-    step = 20  # Plot every 20th data point to reduce density
-    for reward_name, state_dict in results.items():
-        plt.figure(figsize=(12, 5))
-
-        # ---- Subplot 1: Total Rewards ----
-        plt.subplot(1, 2, 1)
-        for state_name, (total_rewards, lengths) in state_dict.items():
-            episodes = range(1, len(total_rewards) + 1)
-            plt.plot(
-                [e for e in episodes][::step],
-                [r for r in total_rewards][::step],
-                label=state_name
-            )
-        plt.title(f"SARSA Learning Curve - Reward: {reward_name}")
-        plt.xlabel("Episode")
-        plt.ylabel("Total Reward")
-        plt.legend()
-
-        # ---- Subplot 2: Snake Length ----
-        plt.subplot(1, 2, 2)
-        for state_name, (total_rewards, lengths) in state_dict.items():
-            episodes = range(1, len(lengths) + 1)
-            plt.plot(
-                [e for e in episodes][::step],
-                [l for l in lengths][::step],
-                label=state_name
-            )
-        plt.title(f"Snake Length - Reward: {reward_name}")
-        plt.xlabel("Episode")
-        plt.ylabel("Length")
-        plt.legend()
-
-        plt.tight_layout()
-        plt.show()
+    plot_results_by_reward(results)
 
     return results

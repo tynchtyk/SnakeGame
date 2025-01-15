@@ -51,8 +51,8 @@ def interactive_play():
 
 def main():
     # Run experiments (train agent with different states & rewards)
-    results = run_all_experiments()
-    print("All Q learning experiments finished. Results saved and plotted.")
+    #results = run_all_experiments()
+    #print("All Q learning experiments finished. Results saved and plotted.")
 
 
     results = run_all_experiments_sarsa()

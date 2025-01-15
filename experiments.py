@@ -1,4 +1,5 @@
 # experiments.py
+import numpy as np
 
 import matplotlib.pyplot as plt
 import os
@@ -63,7 +64,98 @@ def run_experiment(state_space, rewards, num_episodes=1000, show_game=False):
     return total_rewards, lengths, agent
 
 
+def moving_average(data, window_size=50):
+    """
+    Compute the moving average of a list using a sliding window.
+    """
+    if len(data) < window_size:
+        # If the data is smaller than the window size, return the data as-is.
+        return data
 
+    averages = []
+    for i in range(len(data) - window_size + 1):
+        window = data[i:i + window_size]
+        averages.append(sum(window) / window_size)
+    return averages
+
+def plot_results_by_reward(results, step=30, window_size=50):
+    for reward_name, state_dict in results.items():
+        plt.figure(figsize=(12, 5))
+
+        # -- Subplot 1: Total Reward --
+        plt.subplot(1, 2, 1)
+        for state_name, (total_rewards, lengths) in state_dict.items():
+            #avg_rewards = moving_average(total_rewards, window_size)
+            episodes = range(1, len(total_rewards) + 1)
+            plt.plot(
+                [e for e in episodes][::step],
+                [r for r in total_rewards][::step],
+                label=state_name
+            )
+        plt.title(f"Q Learning Reward Graph: {reward_name}")
+        plt.xlabel("Episode")
+        plt.ylabel("Reward")
+        plt.legend()
+
+        # -- Subplot 2: Snake Length --
+        plt.subplot(1, 2, 2)
+        for state_name, (total_rewards, lengths) in state_dict.items():
+            #avg_lengths = moving_average(lengths, window_size)
+            episodes = range(1, len(lengths) + 1)
+            plt.plot(
+                [e for e in episodes][::step],
+                [l for l in lengths][::step],
+                label=state_name
+            )
+        plt.title(f"Q Learning Length Graph: {reward_name}")
+        plt.xlabel("Episode")
+        plt.ylabel("Length")
+        plt.legend()
+
+        plt.tight_layout()
+        plt.show()
+
+
+def plot_results(results, step=20, window_size=50):
+    """
+    Plot the results with moving averages.
+    """
+    plt.figure(figsize=(12, 5))
+
+    # -- Subplot 1: Total Reward --
+    plt.subplot(1, 2, 1)
+    for reward_name, state_dict in results.items():
+        for state_name, (total_rewards, lengths) in state_dict.items():
+            avg_rewards = moving_average(total_rewards, window_size)
+            episodes = range(1, len(avg_rewards) + 1)
+            plt.plot(
+                [e for e in episodes][::step],
+                [r for r in avg_rewards][::step],
+                label=f"{state_name}+{reward_name}"
+            )
+    plt.title("Total Reward (Moving Average)")
+    plt.xlabel("Episode")
+    plt.ylabel("Average Reward")
+    plt.legend()
+
+    # -- Subplot 2: Snake Length --
+    plt.subplot(1, 2, 2)
+    for reward_name, state_dict in results.items():
+        for state_name, (total_rewards, lengths) in state_dict.items():
+            avg_lengths = moving_average(lengths, window_size)
+            episodes = range(1, len(avg_lengths) + 1)
+            plt.plot(
+                [e for e in episodes][::step],
+                [l for l in avg_lengths][::step],
+                label=f"{state_name}+{reward_name}"
+            )
+    plt.title("Snake Length (Moving Average)")
+    plt.xlabel("Episode")
+    plt.ylabel("Average Length")
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
 
 
 def run_all_experiments():
@@ -100,43 +192,9 @@ def run_all_experiments():
             q_table_filename = f"q_tables/q_table_{experiment_key}.pkl"
             agent.save_q_table(q_table_filename)
 
-    # 2. Plot each reward separately
-    step = 20  # downsample step (plot every 20th point)
-    for reward_name, state_dict in results.items():
-        plt.figure(figsize=(12, 5))
-
-        # ---------- Subplot 1: total rewards (learning curve) ----------
-        plt.subplot(1, 2, 1)
-        for state_name, (total_rewards, lengths) in state_dict.items():
-            episodes = range(1, len(total_rewards) + 1)
-            # Plot every 'step'-th point
-            plt.plot(
-                [e for e in episodes][::step],
-                [r for r in total_rewards][::step],
-                label=state_name
-            )
-        plt.title(f"Learning Curve - Reward: {reward_name}")
-        plt.xlabel("Episode")
-        plt.ylabel("Total Reward")
-        plt.legend()
-
-        # ---------- Subplot 2: final snake length ----------
-        plt.subplot(1, 2, 2)
-        for state_name, (total_rewards, lengths) in state_dict.items():
-            episodes = range(1, len(lengths) + 1)
-            plt.plot(
-                [e for e in episodes][::step],
-                [l for l in lengths][::step],
-                label=state_name
-            )
-        plt.title(f"Final Snake Length - Reward: {reward_name}")
-        plt.xlabel("Episode")
-        plt.ylabel("Snake Length")
-        plt.legend()
-
-        plt.tight_layout()
-        plt.show()
-
+    # 2. Plot results for each reward
+    #plot_results(results)
+    plot_results_by_reward(results)
     return results
 
 def run_all_experiments2():

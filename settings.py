@@ -4,8 +4,8 @@
 # GLOBAL GAME & RENDER SETTINGS
 # ------------------------------
 TILE_SIZE = 40
-GRID_WIDTH = 10
-GRID_HEIGHT = 10
+GRID_WIDTH = 30
+GRID_HEIGHT = 30
 SCREEN_WIDTH = GRID_WIDTH * TILE_SIZE
 SCREEN_HEIGHT = GRID_HEIGHT * TILE_SIZE
 FPS = 15
@@ -158,7 +158,7 @@ MIN_EXPLORATION_RATE = 0.01
 # --------------------------------
 # MISCELLANEOUS
 # --------------------------------
-NUM_EPISODES = 3000
+NUM_EPISODES = 2000
 MAX_STEPS_PER_EPISODE = 2000
 
 # Colors, Fonts, etc.

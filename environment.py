@@ -113,7 +113,6 @@ class Environment:
         5. Update self.score with the reward.
         6. Return (reward, done).
         """
-        # 1) Capture old distance to food if you want "closer_to_food" logic
         old_distance = self.distance_to_food()
 
         # 2) Move
@@ -149,12 +148,10 @@ class Environment:
         # 7) If not done, check 'closer_to_food' or 'step' penalty
         if not done:
             new_distance = self.distance_to_food()
-            # If we have 'closer_to_food' in the dict, reward if distance decreased
             if 'closer_to_food' in self.rewards:
                 if new_distance < old_distance:
                     reward += self.rewards['closer_to_food']
                 else:
-                    # else: do the normal step penalty
                     reward += self.rewards.get('step', 0)
             else:
                 # just do step penalty
@@ -167,7 +164,6 @@ class Environment:
         """Simple Euclidean or Manhattan distance from snake head to food."""
         head_x, head_y = self.snake.body[0]
         fx, fy = self.food.position
-        # Manhattan distance (for example):
         return abs(head_x - fx) + abs(head_y - fy)
 
     def draw(self, surface, font, episode):
@@ -176,7 +172,6 @@ class Environment:
         self.snake.draw(surface)
         self.food.draw(surface)
 
-        # Show score & episode
         text = f"Score: {self.score:.1f} | Episode: {episode}"
         text_surface = font.render(text, True, COLORS['white'])
         surface.blit(text_surface, (10, 10))
